@@ -99,6 +99,51 @@ public class TouristRepository {
         return null;
     }
 
+    /**
+     * CRUD method to read an attraction from the database, based on input name
+     * @param name input to search for database entry
+     * @return a corresponding tourist attraction
+     */
+    public TouristAttraction readAttractionByName(String name){
+        String descriptionQuery = "SELECT * FROM attraction_description WHERE name = ?;";
+        String tagsQuery = "SELECT * FROM attraction_tags WHERE name = ?;";
+        try{
+            ArrayList<TouristAttraction> tempList = new ArrayList<>();
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn = DriverManager.getConnection(database, username, password);
+            if (conn == null) {
+                System.out.println("connection not established.");
+            }
+            PreparedStatement pstmtDescription = conn.prepareStatement(descriptionQuery);
+            pstmtDescription.setString(1,name);
+            ResultSet rsDescription = pstmtDescription.executeQuery();
+            while(rsDescription.next()){
+                String attractionName = rsDescription.getString("name");
+                String attractionDescription = rsDescription.getString("description");
+                String attractionCity = rsDescription.getString("city");
+                ArrayList<String> attractionTags = new ArrayList<>();
+                TouristAttraction touristAttraction = new TouristAttraction(attractionName,attractionDescription,attractionCity,attractionTags);
+                tempList.add(touristAttraction);
+            }
+            PreparedStatement pstmtTags = conn.prepareStatement(tagsQuery);
+            pstmtTags.setString(1,name);
+            ResultSet rsTags = pstmtTags.executeQuery();
+            while(rsTags.next()){
+                ArrayList<String> attractionTags = new ArrayList<>();
+                attractionTags.add(rsTags.getString("tag1"));
+                attractionTags.add(rsTags.getString("tag2"));
+                attractionTags.add(rsTags.getString("tag3"));
+                attractionTags.add(rsTags.getString("tag4"));
+                tempList.get(0).setTags(attractionTags);
+            }
+            return tempList.get(0);
+        }
+        catch (Exception e){
+            e.getMessage();
+        }
+        return null;
+    }
+
 
     /**
      * CRUD method to remove a tourist attraction from the list
@@ -146,6 +191,10 @@ public class TouristRepository {
         return null;
     }
 
+    /**
+     * CRUD method to create a new tourist attraction
+     * @param touristAttraction the attraction to be created
+     */
     public void saveAttraction(TouristAttraction touristAttraction){
         getTouristAttractionList().add(touristAttraction);
         String attractionName = touristAttraction.getName();
@@ -182,6 +231,11 @@ public class TouristRepository {
         }
     }
 
+    /**
+     * CRUD method to update an attraction
+     * @param touristAttraction The tourist attraction to be updated
+     * @param name Finds the given attraction by name
+     */
     public void updateAttraction(TouristAttraction touristAttraction, String name) {
         String updateDescriptionQuery = "UPDATE `attraction_description` SET name = ?, description = ?, city = ? WHERE name = ?;";
         String updateTagsQuery = "UPDATE attraction_tags SET tag1 = ?, tag2 = ?, tag3 = ?, tag4 = ? WHERE name = ?;";

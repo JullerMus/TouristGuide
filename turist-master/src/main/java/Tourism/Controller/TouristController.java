@@ -93,7 +93,7 @@ public class TouristController {
         TouristAttraction touristAttraction = touristGuideApplication.deleteAttraction(name);
         return new ResponseEntity<>(touristAttraction, HttpStatus.OK);
     }*/
-    public String deleteTouristAttraction(@PathVariable String name){
+    public String deleteTouristAttraction(@PathVariable("name") String name){
         touristGuideApplication.deleteAttraction(name);
         return "redirect:/attractions";
     }
